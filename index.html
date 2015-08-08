@@ -3,12 +3,14 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Swap2</title>
+	<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
 	<style>
 		html, body {
+			font-family: 'Roboto Condensed', sans-serif;
 			margin: 0;
 			padding: 0;
 			background-color: #0059CC; 
-			background-image: url('img/waves1.png');
+			background-image: url('img/bgtile.gif');
 		}
 		.board {
 			position: relative;
@@ -49,18 +51,43 @@
 		.spot-scope { background-image: url('img/scope.svg'); background-color: #59296D; }
 		.spot-ship { background-image: url('img/ship.svg'); background-color: #A66F3C; }
 		.spot-sword { background-image: url('img/sword.svg'); background-color: #187B78; }
+
+		.stats {
+			background-color: #F3A61A;
+			color: #333;
+			font-size: 24px;
+			padding: .8em;
+			margin: 0 auto;
+			display: block;
+			text-align: right;
+			width: 160px;
+		}
+		body[orientation=landscape] .stats {
+			position: fixed;
+			top: 10px;
+			left: 10px;
+		}
+		body[orientation=portrait] .stats {
+			margin-top: 2em;
+		}
+		.stats > dt { float: left; clear: left; }
 	</style>
 </head>
 <body>
 	<script>
 		(function(window, document){
+			var vW;
+			var vH;
+			var score = 0;
+			var moves = 0;
+			var statsNode;
 			var board;
 			var activeSpot;
 			var boardNode;
 			var boardSize;
 			var spotSize;
 			var rowsAndCols = 9;
-			var types = ['anchor', 'cannon', 'flag', 'hook', 'map', 'mermaid', 'monster', 'pirate', 'rum', 'scope', 'ship', 'sword'];
+			var types = ['anchor', 'cannon', 'flag', 'hook', 'mermaid', 'pirate', 'monster', 'ship']; //  'scope', 'rum', 'sword', 'map',
 
 			function Spot(row, col) {
 				this.node = null;
@@ -126,6 +153,7 @@
 			Spot.prototype.die = function() {
 				if(this.isDead !== true) {
 					this.isDead = true;
+					updateScore(++score);
 
 					this.node.style.opacity = 0;
 					var _this = this;
@@ -147,7 +175,7 @@
 				this.render();
 			};
 
-			Spot.prototype.swapWith = function(s) {
+			Spot.prototype.swapWith = function(s, userSwap) {
 				var r = s.row;
 				var c = s.col;
 				s.row = this.row;
@@ -160,6 +188,10 @@
 
 				s.isDead !== true && s.render();
 				this.isDead !== true && this.render(0);
+
+				if(userSwap === true) {
+					updateMoves(++moves);
+				}
 			};
 
 			Spot.prototype.render = function(renderDelay) {
@@ -175,9 +207,6 @@
 
 					s.style.top = (-1 * spotSize) + 'px';
 					s.style.left = (spotSize * this.col) + 'px';
-
-					// s.textContent = this.type;
-					// s.style.backgroundColor = this.color;
 
 					s.addEventListener('click', function(e){
 						_this.setActive();
@@ -200,7 +229,7 @@
 				}
 
 				if(activeSpot && this && this.isAdjacentTo(activeSpot)) {
-					this.swapWith(activeSpot);
+					this.swapWith(activeSpot, true);
 					activeSpot = null;
 					checkBoardForMatches();
 				} else {
@@ -209,10 +238,45 @@
 				}
 			};
 
-			function initBoardNode() {
+			function updateScore(value) {
+				score = value;
+				renderStats();
+			}
+
+			function updateMoves(value) {
+				moves = value;
+				renderStats();
+			}
+
+			function renderStats() {
+				statsNode && statsNode.parentNode.removeChild(statsNode);
+				statsNode = document.createElement('dl');
+				statsNode.className = 'stats';
+
+				function statRow(key, value) {
+					var dt = document.createElement('dt');
+					dt.textContent = key;
+					statsNode.appendChild(dt);
+
+					var dd = document.createElement('dd');
+					dd.textContent = value;
+					statsNode.appendChild(dd);
+				}
+
+				statRow('Score', score);
+				statRow('Moves', moves);
+
+				document.body.appendChild(statsNode);
+			}
+
+			function getViewportSize() {
 				vW = window.innerWidth;
 				vH = window.innerHeight;
-				boardNode && document.body.removeChild(boardNode);
+				document.body.setAttribute('orientation', vW > vH ? 'landscape' : 'portrait');
+			}
+
+			function initBoardNode() {
+				boardNode && boardNode.parentNode.removeChild(boardNode);
 				boardNode = document.createElement('div');
 				spotSize = Math.floor( (vW > vH ? vH : vW) / rowsAndCols );
 				boardSize = spotSize * rowsAndCols;
@@ -279,10 +343,12 @@
 			}
 
 			(function init(){
+				getViewportSize();
 				initBoardNode();
 				resetBoard();
 				renderBoard();
 				checkBoardForMatches();
+				renderStats();
 			})();
 
 		})(window, document);
