@@ -31,13 +31,14 @@
 			text-align: center;
 			overflow: hidden;
 
-			-webkit-transition: top .4s ease, left .4s ease, opacity .8s ease;
-			-moz-transition: top .4s ease, left .4s ease, opacity .8s ease;
-			-o-transition: top .4s ease, left .4s ease, opacity .8s ease;
-			-ms-transition: top .4s ease, left .4s ease, opacity .8s ease;
-			transition: top .4s ease, left .4s ease, opacity .8s ease;
+			-webkit-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+			-moz-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+			-o-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+			-ms-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+			transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
 		}
 		.spot[data-active-spot] { border: 4px solid #FDAB02; margin: -4px; z-index: 999; }
+		.spot[data-dead-spot] { transform: scale(2) rotate(10deg); opacity: 0; }
 
 		.spot-anchor { background-image: url('img/anchor.svg'); background-color: #54DED0; }
 		.spot-cannon { background-image: url('img/cannon.svg'); background-color: #F3A61A; }
@@ -157,7 +158,8 @@
 					this.isDead = true;
 					updateScore(++score);
 
-					this.node.style.opacity = 0;
+					this.node.setAttribute('data-dead-spot', 'true');
+					// this.node.style.opacity = 0;
 					var _this = this;
 					window.setTimeout(function(){
 						_this.node.parentNode.removeChild(_this.node);
@@ -218,7 +220,7 @@
 						var n = _this.getNeighbor(dir);
 						if(n !== null) {
 							_this.swapWith(n, true);
-							checkBoardForMatches();
+							checkBoardForMatches(450);
 						}
 					});
 					boardNode.appendChild(this.node);
@@ -240,7 +242,8 @@
 				if(activeSpot && this && this.isAdjacentTo(activeSpot)) {
 					this.swapWith(activeSpot, true);
 					activeSpot = null;
-					checkBoardForMatches();
+					
+					checkBoardForMatches(450);
 				} else {
 					activeSpot = this;
 					this.node.setAttribute('data-active-spot', 'true');
@@ -317,21 +320,37 @@
 				}
 			}
 
-			function checkBoardForMatches() {
-				var matchesFound;
-				do {
-					matchesFound = false;
-					for(var r = 0; r < rowsAndCols; r++) {
-						for(var c = 0; c < rowsAndCols; c++) {
-							if(board[r][c] !== null && board[r][c].checkNeighbors()) {
-								matchesFound = true;
+			function shuffleBoard() {
+				for(var r = 0; r < rowsAndCols; r++) {
+					for(var c = 0; c < rowsAndCols; c++) {
+						board[r][c] !== null && board[r][c].render(300);
+					}
+				}
+			}
+
+			function checkBoardForMatches(delay) {
+				var check = function() {
+					var matchesFound;
+					do {
+						matchesFound = false;
+						for(var r = 0; r < rowsAndCols; r++) {
+							for(var c = 0; c < rowsAndCols; c++) {
+								if(board[r][c] !== null && board[r][c].checkNeighbors()) {
+									matchesFound = true;
+								}
 							}
 						}
-					}
-					if(matchesFound === true) {
-						gravity();
-					}
-				} while (matchesFound === true);
+						if(matchesFound === true) {
+							gravity();
+						}
+					} while (matchesFound === true);
+				};
+
+				if(typeof delay === 'number') {
+					window.setTimeout(check, delay);
+				} else {
+					check();
+				}
 			}
 
 			function gravity() {
