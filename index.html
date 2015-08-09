@@ -17,6 +17,7 @@
 			display: block;
 			margin: 0 auto;
 			padding: 0;
+			overflow: hidden;
 		}
 		.spot {
 			display: block;
@@ -77,7 +78,7 @@
 <body>
 	<script src="Swipe.js"></script>
 	<script>
-		(function(window, document){
+		var Swap = (function(window, document){
 			var vW;
 			var vH;
 			var score = 0;
@@ -159,7 +160,6 @@
 					updateScore(++score);
 
 					this.node.setAttribute('data-dead-spot', 'true');
-					// this.node.style.opacity = 0;
 					var _this = this;
 					window.setTimeout(function(){
 						_this.node.parentNode.removeChild(_this.node);
@@ -210,7 +210,7 @@
 					s.style.lineHeight = spotSize + 'px';
 
 					s.style.top = (-1 * spotSize) + 'px';
-					s.style.left = (spotSize * this.col) + 'px';
+					s.style.left = (spotSize * (this.col + 1)) + 'px';
 
 					s.addEventListener('click', function(e){
 						_this.setActive();
@@ -227,7 +227,7 @@
 				}
 				
 				window.setTimeout(function(){
-					_this.node.style.left = (spotSize * _this.col) + 'px';
+					_this.node.style.left = (spotSize * (_this.col + 1)) + 'px';
 					_this.node.style.top = (spotSize * _this.row) + 'px';
 				}, renderDelay);
 			};
@@ -297,6 +297,7 @@
 				boardSize = spotSize * rowsAndCols;
 				boardNode.style.width = boardSize + 'px';
 				boardNode.style.height = boardSize + 'px';
+				boardNode.style.padding = vW > vH ? '0 ' + spotSize + 'px' : spotSize + 'px 0';
 				boardNode.className = 'board';
 				document.body.appendChild(boardNode);
 			}
@@ -321,9 +322,25 @@
 			}
 
 			function shuffleBoard() {
+				var all = [];
+
+				//flatten board
 				for(var r = 0; r < rowsAndCols; r++) {
 					for(var c = 0; c < rowsAndCols; c++) {
-						board[r][c] !== null && board[r][c].render(300);
+						all.push(board[r][c]);
+					}
+				}
+
+				//shuffle all
+				for(var j, x, i = all.length; i; j = Math.floor(Math.random() * i), x = all[--i], all[i] = all[j], all[j] = x);
+
+				//re-organize
+				for(var r = 0; r < rowsAndCols; r++) {
+					for(var c = 0; c < rowsAndCols; c++) {
+						board[r][c] = all.shift();
+						board[r][c].row = r;
+						board[r][c].col = c;
+						board[r][c].render();
 					}
 				}
 			}
@@ -381,6 +398,10 @@
 				checkBoardForMatches();
 				renderStats();
 			})();
+
+			return {
+				shuffleBoard: shuffleBoard
+			};
 
 		})(window, document);
 	</script>
