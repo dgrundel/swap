@@ -74,6 +74,7 @@
 	</style>
 </head>
 <body>
+	<script src="Swipe.js"></script>
 	<script>
 		(function(window, document){
 			var vW;
@@ -95,6 +96,7 @@
 				this.col = col;
 				this.type = types[Math.floor(Math.random()*types.length)];
 				this.isDead = false;
+				this.swipe = null;
 			}
 
 			Spot.prototype.isAdjacentTo = function(s) {
@@ -212,6 +214,13 @@
 						_this.setActive();
 					});
 					this.node = s;
+					this.swipe = new Swipe(this.node, function(dir){
+						var n = _this.getNeighbor(dir);
+						if(n !== null) {
+							_this.swapWith(n, true);
+							checkBoardForMatches();
+						}
+					});
 					boardNode.appendChild(this.node);
 				}
 				
@@ -265,6 +274,9 @@
 
 				statRow('Score', score);
 				statRow('Moves', moves);
+				if(moves > 0) {
+					statRow('Ratio', (score / moves).toFixed(2));
+				}
 
 				document.body.appendChild(statsNode);
 			}
