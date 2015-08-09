@@ -1,0 +1,72 @@
+html, body {
+	font-family: 'Roboto Condensed', sans-serif;
+	margin: 0;
+	padding: 0;
+	background-color: #0059CC; 
+	background-image: url('img/bgtile.gif');
+}
+.board {
+	position: relative;
+	display: block;
+	margin: 0 auto;
+	padding: 0;
+	overflow: hidden;
+}
+.spot {
+	display: block;
+	position: absolute;
+	z-index: 1;
+	border-radius: 50%;
+	background-size: 65%;
+	background-position: center;
+	background-repeat: no-repeat;
+	box-shadow: 0 0 10px 0 rgba(0,0,0,0.5);
+
+	text-align: center;
+	overflow: hidden;
+
+	-webkit-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+	-moz-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+	-o-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+	-ms-transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+	transition: top .4s ease, left .4s ease, opacity .8s ease, transform .4s ease;
+}
+.spot[data-active-spot] { border: 4px solid #FDAB02; margin: -4px; z-index: 999; }
+.spot[data-dead-spot] { transform: scale(2) rotate(10deg); opacity: 0; }
+
+.spot-anchor { background-image: url('img/anchor.svg'); background-color: #54DED0; }
+.spot-cannon { background-image: url('img/cannon.svg'); background-color: #F3A61A; }
+.spot-flag { background-image: url('img/flag.svg'); background-color: #3084B3; }
+.spot-hook { background-image: url('img/hook.svg'); background-color: #EC4E4E; }
+.spot-map { background-image: url('img/map.svg'); background-color: #404041; }
+.spot-mermaid { background-image: url('img/mermaid.svg'); background-color: #B290D0; }
+.spot-monster { background-image: url('img/monster.svg'); background-color: #E2DD35; }
+.spot-pirate { background-image: url('img/pirate.svg'); background-color: #fff; }
+.spot-rum { background-image: url('img/rum.svg'); background-color: #E8D6A5; }
+.spot-scope { background-image: url('img/scope.svg'); background-color: #59296D; }
+.spot-ship { background-image: url('img/ship.svg'); background-color: #A66F3C; }
+.spot-sword { background-image: url('img/sword.svg'); background-color: #187B78; }
+
+.stats {
+	background-color: #F3A61A;
+	color: #404041;
+	font-size: 24px;
+	padding: .8em;
+	margin: 0 auto;
+	display: block;
+	text-align: right;
+	width: 16ex;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	border-bottom: 3px solid #B98017;
+}
+body[orientation=landscape] .stats {
+	position: fixed;
+	top: 10px;
+	left: 10px;
+}
+body[orientation=portrait] .stats {
+	margin-top: 2em;
+}
+.stats > dt { float: left; clear: left; }
+.stats > dd { margin: 0; font-weight: bold; }
