@@ -349,10 +349,10 @@ var Swap = (function(window, document){
 		statsNode.appendChild(controls);
 
 		var shuffleButtonEnabledText = 'Shuffle Board (+3 Moves)';
-		var shuffleButtonDisabledText = 'Shuffle Board (30 sec)';
+		var shuffleButtonDisabledText = 'Shuffle Board <i class="fa fa-clock-o"></i> :';
 		var shuffleButton = document.createElement('button');
 		shuffleButton.className = 'control-button';
-		shuffleButton.textContent = shuffleButtonEnabledText;
+		shuffleButton.innerHTML = shuffleButtonEnabledText;
 		shuffleButton.addEventListener('click', function(e){
 			shuffleBoard();
 			updateMoves(moves + 3);
@@ -360,12 +360,22 @@ var Swap = (function(window, document){
 			window.setTimeout(checkBoardForMatches, 800);
 
 			shuffleButton.disabled = true;
-			shuffleButton.textContent = shuffleButtonDisabledText;
+			var countDown = 30;
+			shuffleButton.innerHTML = shuffleButtonDisabledText + countDown;
+
+			var countDownUpdate = function() {
+				countDown--;
+				if(countDown === 0) {
+					shuffleButton.disabled = false;
+					shuffleButton.innerHTML = shuffleButtonEnabledText;
+				} else {
+					shuffleButton.innerHTML = shuffleButtonDisabledText + (countDown >= 10 ? countDown : '0' + countDown);
+					window.setTimeout(countDownUpdate, 1000);
+				}
+			};
+
+			window.setTimeout(countDownUpdate, 1000);
 			
-			window.setTimeout(function(){
-				shuffleButton.disabled = false;
-				shuffleButton.textContent = shuffleButtonEnabledText;
-			}, 30000);
 		});
 		controls.appendChild(shuffleButton);
 
