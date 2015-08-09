@@ -104,3 +104,15 @@ body[orientation=portrait] .shuffle-button { padding: .8em 3ex; }
 	border-bottom-color: #BD4545;
 	color: #6D2020;
 }
+
+#by {
+	padding: 1ex;
+	text-align: right;
+	font-size: 14px;
+	color: #fff;
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	width: 24ex;
+}
+#by a { color: #fff; }
