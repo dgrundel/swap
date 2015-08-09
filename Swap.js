@@ -1,57 +1,3 @@
-var sfx = (function(){
-	var context = new (window.AudioContext || window.webkitAudioContext)();
-	var sounds = {
-		pop: { path: 'mp3/pop.mp3', gain: 0.5 },
-		arr: { path: 'mp3/arr.mp3', gain: 0.8 },
-		poopdeck: { path: 'mp3/poopdeck.mp3' },
-		rum: { path: 'mp3/rum.mp3' },
-		kraken: { path: 'mp3/kraken.mp3' }
-	};
-
-	function error() { }
-
-	function load(name) {
-		if(sounds[name] && sounds[name].path) {
-			var request = new XMLHttpRequest();
-			request.open('GET', sounds[name].path, true);
-			request.responseType = 'arraybuffer';
-			request.onload = function() {
-				context.decodeAudioData(request.response, function(theBuffer) {
-					sounds[name].buffer = theBuffer;
-				}, error);
-			}
-			request.send();
-		}
-	}
-
-	function play(name) {
-		if(sounds[name] && sounds[name].buffer) {
-			var buffer = sounds[name].buffer;
-			var gainValue = typeof sounds[name].gain === 'number' ? sounds[name].gain : 1;
-			var source = context.createBufferSource()
-			var g = context.createGain();
-
-			source.buffer = buffer;
-			source.start(0);
-			g.gain.value = gainValue;
-			source.connect(g);
-			g.connect(context.destination);
-		}
-	}
-
-	(function init() {
-		for(var name in sounds) {
-			if(sounds.hasOwnProperty(name)) {
-				load(name);
-			}
-		}
-	})();
-
-	return {
-		play: play
-	}
-})();
-
 var Swap = (function(window, document){
 	var vW;
 	var vH;
@@ -423,7 +369,16 @@ var Swap = (function(window, document){
 		controls.appendChild(shuffleButton);
 	}
 
+	function initSounds() {
+		sfx.add('pop', { path: 'mp3/pop.mp3', gain: 0.5 });
+		sfx.add('arr', { path: 'mp3/arr.mp3', gain: 0.8 });
+		sfx.add('poopdeck', { path: 'mp3/poopdeck.mp3' });
+		sfx.add('rum', { path: 'mp3/rum.mp3', gain: 0.8 });
+		sfx.add('kraken', { path: 'mp3/kraken.mp3' });
+	}
+
 	(function init(){
+		initSounds();
 		initNodes();
 		getViewportSize();
 		initBoardNode();
