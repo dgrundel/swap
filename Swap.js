@@ -1,4 +1,5 @@
 var Swap = (function(window, document){
+	var soundEnabled = true;
 	var vW;
 	var vH;
 	var score = 0;
@@ -287,18 +288,18 @@ var Swap = (function(window, document){
 			}
 			if(matchesFound === true) {
 				comboCount++;
-				sfx.play('pop');
+				soundEnabled === true && sfx.play('pop');
 				gravity();
 				window.setTimeout(check, 600);
 
 			} else if(comboCount > 3) {
-				sfx.play('kraken');
+				soundEnabled === true && sfx.play('kraken');
 
 			} else if(comboCount > 2) {
-				sfx.play('rum');
+				soundEnabled === true && sfx.play('rum');
 
 			} else if(comboCount > 1) {
-				sfx.play('arr');
+				soundEnabled === true && sfx.play('arr');
 			}
 		};
 
@@ -350,12 +351,12 @@ var Swap = (function(window, document){
 		var shuffleButtonEnabledText = 'Shuffle Board (+3 Moves)';
 		var shuffleButtonDisabledText = 'Shuffle Board (30 sec)';
 		var shuffleButton = document.createElement('button');
-		shuffleButton.className = 'shuffle-button';
+		shuffleButton.className = 'control-button';
 		shuffleButton.textContent = shuffleButtonEnabledText;
 		shuffleButton.addEventListener('click', function(e){
 			shuffleBoard();
 			updateMoves(moves + 3);
-			sfx.play('poopdeck');
+			soundEnabled === true && sfx.play('poopdeck');
 			window.setTimeout(checkBoardForMatches, 800);
 
 			shuffleButton.disabled = true;
@@ -367,6 +368,23 @@ var Swap = (function(window, document){
 			}, 30000);
 		});
 		controls.appendChild(shuffleButton);
+
+		var soundButtonEnabledText = '<i class="fa fa-volume-up"></i> Sound On';
+		var soundButtonDisabledText = '<i class="fa fa-ban"></i> Sound Off';
+		var soundButton = document.createElement('button');
+		soundButton.className = 'control-button';
+		soundButton.innerHTML = soundButtonEnabledText;
+		soundButton.addEventListener('click', function(e){
+			soundEnabled = !soundEnabled;
+
+			if(soundEnabled) {
+				soundButton.removeAttribute('data-off-state');
+			} else {
+				soundButton.setAttribute('data-off-state', 'true');
+			}
+			soundButton.innerHTML = soundEnabled ? soundButtonEnabledText : soundButtonDisabledText;
+		});
+		controls.appendChild(soundButton);
 	}
 
 	function initSounds() {

@@ -12,6 +12,8 @@ html, body {
 	background-image: url('img/bgtile.gif');
 }
 input, button, textarea { font-family: 'Roboto Condensed', sans-serif; }
+button { cursor: pointer; }
+
 .board {
 	position: relative;
 	display: block;
@@ -78,14 +80,14 @@ body[orientation=portrait] .stats table {
 	width: 16ex;
 }
 body[orientation=portrait] .stats .controls { float: right; margin: 0; }
-body[orientation=portrait] .shuffle-button { padding: .8em 3ex; }
+body[orientation=portrait] .control-button { padding: .8em 3ex; }
 
 .stats table { width: 100%; }
 .stats th, 
 .stats td { padding: .15em 0; text-align: left; }
 .stats td { font-weight: bold; text-align: right; }
 
-.shuffle-button {
+.control-button {
 	display: block;
 	margin: 0 auto;
 	font-size: 16px;
@@ -99,7 +101,8 @@ body[orientation=portrait] .shuffle-button { padding: .8em 3ex; }
 	font-weight: bold;
 	margin-top: .8em;
 }
-.shuffle-button[disabled] {
+.control-button[disabled],
+.control-button[data-off-state] {
 	background-color: #EC4E4E;
 	border-bottom-color: #BD4545;
 	color: #6D2020;
