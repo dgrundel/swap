@@ -4,7 +4,8 @@ var sfx = (function(){
 		pop: { path: 'mp3/pop.mp3', gain: 0.5 },
 		arr: { path: 'mp3/arr.mp3', gain: 0.8 },
 		poopdeck: { path: 'mp3/poopdeck.mp3' },
-		rum: { path: 'mp3/rum.mp3' }
+		rum: { path: 'mp3/rum.mp3' },
+		kraken: { path: 'mp3/kraken.mp3' }
 	};
 
 	function error() { }
@@ -343,6 +344,9 @@ var Swap = (function(window, document){
 				sfx.play('pop');
 				gravity();
 				window.setTimeout(check, 600);
+
+			} else if(comboCount > 3) {
+				sfx.play('kraken');
 
 			} else if(comboCount > 2) {
 				sfx.play('rum');
