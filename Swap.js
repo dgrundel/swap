@@ -1,9 +1,63 @@
+var sfx = (function(){
+	var context = new (window.AudioContext || window.webkitAudioContext)();
+	var sounds = {
+		pop: { path: 'mp3/pop.mp3', gain: 0.5 },
+		arr: { path: 'mp3/arr.mp3', gain: 0.8 },
+		poopdeck: { path: 'mp3/poopdeck.mp3' },
+		rum: { path: 'mp3/rum.mp3' }
+	};
+
+	function error() { }
+
+	function load(name) {
+		if(sounds[name] && sounds[name].path) {
+			var request = new XMLHttpRequest();
+			request.open('GET', sounds[name].path, true);
+			request.responseType = 'arraybuffer';
+			request.onload = function() {
+				context.decodeAudioData(request.response, function(theBuffer) {
+					sounds[name].buffer = theBuffer;
+				}, error);
+			}
+			request.send();
+		}
+	}
+
+	function play(name) {
+		if(sounds[name] && sounds[name].buffer) {
+			var buffer = sounds[name].buffer;
+			var gainValue = typeof sounds[name].gain === 'number' ? sounds[name].gain : 1;
+			var source = context.createBufferSource()
+			var g = context.createGain();
+
+			source.buffer = buffer;
+			source.start(0);
+			g.gain.value = gainValue;
+			source.connect(g);
+			g.connect(context.destination);
+		}
+	}
+
+	(function init() {
+		for(var name in sounds) {
+			if(sounds.hasOwnProperty(name)) {
+				load(name);
+			}
+		}
+	})();
+
+	return {
+		play: play
+	}
+})();
+
 var Swap = (function(window, document){
 	var vW;
 	var vH;
 	var score = 0;
 	var moves = 0;
 	var statsNode;
+	var statsTable;
 	var board;
 	var activeSpot;
 	var boardNode;
@@ -77,12 +131,14 @@ var Swap = (function(window, document){
 	Spot.prototype.die = function() {
 		if(this.isDead !== true) {
 			this.isDead = true;
-			updateScore(++score);
+			updateScore(score + 1);
 
 			this.node.setAttribute('data-dead-spot', 'true');
 			var _this = this;
 			window.setTimeout(function(){
-				_this.node.parentNode.removeChild(_this.node);
+				try {
+					_this.node.parentNode.removeChild(_this.node);
+				} catch(e) { }
 			}, 800);
 		}
 	}
@@ -114,7 +170,7 @@ var Swap = (function(window, document){
 		this.isDead !== true && this.render(0);
 
 		if(userSwap === true) {
-			updateMoves(++moves);
+			updateMoves(moves + 1);
 		}
 	};
 
@@ -159,7 +215,7 @@ var Swap = (function(window, document){
 		
 		window.setTimeout(function(){
 			_this.node.style.left = (spotSize * (_this.col + (orientation === 'l' ? 1 : 0))) + 'px';
-			_this.node.style.top = (spotSize * _this.row + (orientation === 'p' ? 1 : 0)) + 'px';
+			_this.node.style.top = (spotSize * (_this.row + (orientation === 'p' ? 1 : 0))) + 'px';
 		}, renderDelay);
 	};
 
@@ -193,16 +249,20 @@ var Swap = (function(window, document){
 
 	function renderStats() {
 		var statRow = function(key, value) {
-			var dt = document.createElement('dt');
-			dt.textContent = key;
-			statsNode.appendChild(dt);
+			var tr = document.createElement('tr');
 
-			var dd = document.createElement('dd');
-			dd.textContent = value;
-			statsNode.appendChild(dd);
+			var th = document.createElement('th');
+			th.textContent = key;
+			tr.appendChild(th);
+
+			var td = document.createElement('td');
+			td.textContent = value;
+			tr.appendChild(td);
+			
+			statsTable.appendChild(tr);
 		};
 
-		statsNode.innerHTML = '';
+		statsTable.innerHTML = '';
 		statRow('Score', score);
 		statRow('Moves', moves);
 		if(moves > 0) {
@@ -267,26 +327,33 @@ var Swap = (function(window, document){
 		}
 	}
 
-	function checkBoardForMatches(delay) {
+	function checkBoardForMatches(initialDelay) {
+		var comboCount = 0;
 		var check = function() {
-			var matchesFound;
-			do {
-				matchesFound = false;
-				for(var r = 0; r < rowsAndCols; r++) {
-					for(var c = 0; c < rowsAndCols; c++) {
-						if(board[r][c] !== null && board[r][c].checkNeighbors()) {
-							matchesFound = true;
-						}
+			var matchesFound = false;
+			for(var r = 0; r < rowsAndCols; r++) {
+				for(var c = 0; c < rowsAndCols; c++) {
+					if(board[r][c] !== null && board[r][c].checkNeighbors()) {
+						matchesFound = true;
 					}
 				}
-				if(matchesFound === true) {
-					gravity();
-				}
-			} while (matchesFound === true);
+			}
+			if(matchesFound === true) {
+				comboCount++;
+				sfx.play('pop');
+				gravity();
+				window.setTimeout(check, 600);
+
+			} else if(comboCount > 2) {
+				sfx.play('rum');
+
+			} else if(comboCount > 1) {
+				sfx.play('arr');
+			}
 		};
 
-		if(typeof delay === 'number') {
-			window.setTimeout(check, delay);
+		if(typeof initialDelay === 'number') {
+			window.setTimeout(check, initialDelay);
 		} else {
 			check();
 		}
@@ -317,9 +384,39 @@ var Swap = (function(window, document){
 		boardNode.className = 'board';
 		document.body.appendChild(boardNode);
 
-		statsNode = document.createElement('dl');
-		statsNode.className = 'stats';
+		statsNode = document.createElement('div');
+		statsNode.className = 'stats cf';
 		document.body.appendChild(statsNode);
+
+		var t = document.createElement('table');
+		statsNode.appendChild(t);
+		statsTable = document.createElement('tbody');
+		t.appendChild(statsTable);
+
+		var controls = document.createElement('div');
+		controls.className = 'controls cf';
+		statsNode.appendChild(controls);
+
+		var shuffleButtonEnabledText = 'Shuffle Board (+3 Moves)';
+		var shuffleButtonDisabledText = 'Shuffle Board (30 sec)';
+		var shuffleButton = document.createElement('button');
+		shuffleButton.className = 'shuffle-button';
+		shuffleButton.textContent = shuffleButtonEnabledText;
+		shuffleButton.addEventListener('click', function(e){
+			shuffleBoard();
+			updateMoves(moves + 3);
+			sfx.play('poopdeck');
+			window.setTimeout(checkBoardForMatches, 800);
+
+			shuffleButton.disabled = true;
+			shuffleButton.textContent = shuffleButtonDisabledText;
+			
+			window.setTimeout(function(){
+				shuffleButton.disabled = false;
+				shuffleButton.textContent = shuffleButtonEnabledText;
+			}, 30000);
+		});
+		controls.appendChild(shuffleButton);
 	}
 
 	(function init(){

@@ -1,10 +1,17 @@
+.cf:before,
+.cf:after { content: " "; display: table; }
+.cf:after { clear: both; }
+.cf { *zoom: 1; }
+
 html, body {
 	font-family: 'Roboto Condensed', sans-serif;
+	font-size: 24px;
 	margin: 0;
 	padding: 0;
-	background-color: #0059CC; 
+	background-color: #2A777D; 
 	background-image: url('img/bgtile.gif');
 }
+input, button, textarea { font-family: 'Roboto Condensed', sans-serif; }
 .board {
 	position: relative;
 	display: block;
@@ -50,12 +57,10 @@ html, body {
 .stats {
 	background-color: #F3A61A;
 	color: #404041;
-	font-size: 24px;
 	padding: .8em;
 	margin: 0 auto;
 	display: block;
 	text-align: right;
-	width: 16ex;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0,0,0,0.5);
 	border-bottom: 3px solid #B98017;
@@ -64,9 +69,38 @@ body[orientation=landscape] .stats {
 	position: fixed;
 	top: 10px;
 	left: 10px;
+	width: 16ex;
 }
-body[orientation=portrait] .stats {
-	margin-top: 2em;
+body[orientation=portrait] .stats { margin: 0 4ex; }
+body[orientation=portrait] .stats table {
+	float: left;
+	margin: 0;
+	width: 16ex;
 }
-.stats > dt { float: left; clear: left; }
-.stats > dd { margin: 0; font-weight: bold; }
+body[orientation=portrait] .stats .controls { float: right; margin: 0; }
+body[orientation=portrait] .shuffle-button { padding: .8em 3ex; }
+
+.stats table { width: 100%; }
+.stats th, 
+.stats td { padding: .15em 0; text-align: left; }
+.stats td { font-weight: bold; text-align: right; }
+
+.shuffle-button {
+	display: block;
+	margin: 0 auto;
+	font-size: 16px;
+	width: 100%;
+	padding: .8em 0;
+	border: 0 none;
+	border-bottom: 2px solid #3BA056;
+	border-radius: 4px;
+	background-color: #54DE79;
+	color: #fff;
+	font-weight: bold;
+	margin-top: .8em;
+}
+.shuffle-button[disabled] {
+	background-color: #EC4E4E;
+	border-bottom-color: #BD4545;
+	color: #6D2020;
+}
